@@ -150,6 +150,15 @@ func (a *API) GetTextMessages(convID string, unreadOnly bool) ([]Message, error)
 	return res, nil
 }
 
+func (a *API) DeleteMessage(channelName string, messageId int) error {
+	read := fmt.Sprintf(`{"method": "delete", "params": {"options": {"channel": {"name": "%s"}, "message_id": %d}}}`, channelName, messageId)
+	if _, err := io.WriteString(a.input, read); err != nil {
+		return err
+	}
+	a.output.Scan()
+	return nil
+}
+
 type sendMessageBody struct {
 	Body string
 }
