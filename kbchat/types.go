@@ -39,6 +39,7 @@ type Content struct {
 }
 
 type Message struct {
+	Id		int  	`json:"id"`
 	Content Content `json:"content"`
 	Sender  Sender  `json:"sender"`
 }
