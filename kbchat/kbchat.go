@@ -103,6 +103,29 @@ func (a *API) GetConversations(unreadOnly bool) ([]Conversation, error) {
 	return inbox.Result.Convs, nil
 }
 
+func (a *API) GetConversationMessages(conversationId string) ([]Message, error) {
+	command := fmt.Sprintf(`{"method": "read", "params": {"options": {"channel": {"name": "%s"}}}}`, conversationId)
+	if _, err := io.WriteString(a.input, command); err != nil {
+		return nil, err
+	}
+	a.output.Scan()
+
+	var thread Thread
+	threadRaw := a.output.Text()
+	if err := json.Unmarshal([]byte(threadRaw[:]), &thread); err != nil {
+		return nil, err
+	}
+
+	var messages []Message
+	for _, message := range thread.Result.Messages {
+		if message.Msg.Content.Type == "text" {
+			messages = append(messages, message.Msg)
+		}
+	}
+
+	return messages, nil
+}
+
 // GetTextMessages fetches all text messages from a given conversation ID. Optionally can filter
 // ont unread status.
 func (a *API) GetTextMessages(convID string, unreadOnly bool) ([]Message, error) {
